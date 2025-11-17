@@ -22,10 +22,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Create initial response with security middleware
-  const securityResponse = securityMiddleware.middleware()(request)
-
-  // Apply rate limiting for API routes
+  // Apply rate limiting for API routes first
   if (pathname.startsWith('/api/')) {
     const rateLimiter = getRateLimiterForPath(pathname)
     if (rateLimiter) {
@@ -48,21 +45,38 @@ export async function middleware(request: NextRequest) {
           }
         )
       }
-
-      // Add rate limit headers to successful response
-      securityResponse.headers.set('X-RateLimit-Limit', rateLimiter['config']?.maxRequests?.toString() || '100')
-      securityResponse.headers.set('X-RateLimit-Remaining', (rateLimitResult.remaining || 0).toString())
-      securityResponse.headers.set('X-RateLimit-Reset', ((rateLimitResult.resetTime || 0) / 1000).toString())
     }
   }
 
-  // Allow public routes to proceed without authentication but with security
-  if (publicRoutes.includes(pathname)) {
-    // Set CSRF token for public pages that might have forms
-    if (['/', '/login', '/signup'].includes(pathname)) {
-      CSRFProtection.setTokenCookie(securityResponse)
-    }
+  // Create response with security headers
+  const response = NextResponse.next()
+
+  // Apply security middleware
+  const securityMiddlewareInstance = securityMiddleware.middleware()
+  const securityResponse = await securityMiddlewareInstance(request)
+
+  // If security middleware returned a response (like CSRF error), use it
+  if (securityResponse.status !== 200) {
     return securityResponse
+  }
+
+  // Add rate limit headers to successful response
+  if (pathname.startsWith('/api/')) {
+    const rateLimiter = getRateLimiterForPath(pathname)
+    if (rateLimiter) {
+      const rateLimitResult = rateLimiter.check(request)
+      response.headers.set('X-RateLimit-Limit', rateLimiter['config']?.maxRequests?.toString() || '100')
+      response.headers.set('X-RateLimit-Remaining', (rateLimitResult.remaining || 0).toString())
+      response.headers.set('X-RateLimit-Reset', ((rateLimitResult.resetTime || 0) / 1000).toString())
+    }
+  }
+
+  // Set CSRF token for public pages that might have forms
+  if (publicRoutes.includes(pathname)) {
+    if (['/', '/login', '/signup'].includes(pathname)) {
+      CSRFProtection.setTokenCookie(response)
+    }
+    return response
   }
 
   // Check authentication for protected routes
@@ -71,16 +85,16 @@ export async function middleware(request: NextRequest) {
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!session) {
       // Redirect to login with return URL
-      const loginUrl = new URL('/', request.url) // Updated to redirect to home page instead of /login
+      const loginUrl = new URL('/', request.url)
       loginUrl.searchParams.set('returnTo', pathname)
       return NextResponse.redirect(loginUrl)
     }
   }
 
   // Set CSRF token for authenticated users
-  CSRFProtection.setTokenCookie(securityResponse)
+  CSRFProtection.setTokenCookie(response)
 
-  return securityResponse
+  return response
 }
 
 export const config = {
