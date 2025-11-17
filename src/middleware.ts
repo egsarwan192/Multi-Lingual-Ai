@@ -22,31 +22,47 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Add security headers for all routes
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  // Create initial response with security middleware
+  const securityResponse = securityMiddleware.middleware()(request)
 
-  // Security headers configuration
-  const securityHeaders = {
-    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.stripe.com https://js.stripe.com;",
-    'X-Frame-Options': 'DENY',
-    'X-Content-Type-Options': 'nosniff',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Strict-Transport-Security': process.env.NODE_ENV === 'production' ? 'max-age=31536000; includeSubDomains' : undefined,
+  // Apply rate limiting for API routes
+  if (pathname.startsWith('/api/')) {
+    const rateLimiter = getRateLimiterForPath(pathname)
+    if (rateLimiter) {
+      const rateLimitResult = rateLimiter.check(request)
+      if (!rateLimitResult.success) {
+        return new Response(
+          JSON.stringify({
+            error: 'Rate limit exceeded',
+            retryAfter: Math.ceil(((rateLimitResult.resetTime || 0) - Date.now()) / 1000)
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-RateLimit-Limit': rateLimiter['config']?.maxRequests?.toString() || '100',
+              'X-RateLimit-Remaining': (rateLimitResult.remaining || 0).toString(),
+              'X-RateLimit-Reset': ((rateLimitResult.resetTime || 0) / 1000).toString(),
+              'Retry-After': Math.ceil(((rateLimitResult.resetTime || 0) - Date.now()) / 1000).toString()
+            }
+          }
+        )
+      }
+
+      // Add rate limit headers to successful response
+      securityResponse.headers.set('X-RateLimit-Limit', rateLimiter['config']?.maxRequests?.toString() || '100')
+      securityResponse.headers.set('X-RateLimit-Remaining', (rateLimitResult.remaining || 0).toString())
+      securityResponse.headers.set('X-RateLimit-Reset', ((rateLimitResult.resetTime || 0) / 1000).toString())
+    }
   }
 
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    if (value) {
-      response.headers.set(key, value)
-    }
-  })
-
-  // Allow public routes to proceed without authentication
+  // Allow public routes to proceed without authentication but with security
   if (publicRoutes.includes(pathname)) {
-    return response
+    // Set CSRF token for public pages that might have forms
+    if (['/', '/login', '/signup'].includes(pathname)) {
+      CSRFProtection.setTokenCookie(securityResponse)
+    }
+    return securityResponse
   }
 
   // Check authentication for protected routes
@@ -55,13 +71,16 @@ export async function middleware(request: NextRequest) {
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!session) {
       // Redirect to login with return URL
-      const loginUrl = new URL('/login', request.url)
+      const loginUrl = new URL('/', request.url) // Updated to redirect to home page instead of /login
       loginUrl.searchParams.set('returnTo', pathname)
       return NextResponse.redirect(loginUrl)
     }
   }
 
-  return response
+  // Set CSRF token for authenticated users
+  CSRFProtection.setTokenCookie(securityResponse)
+
+  return securityResponse
 }
 
 export const config = {
