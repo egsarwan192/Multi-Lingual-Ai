@@ -265,7 +265,7 @@ async function getSearchStatistics(userId: string, query: string, modelProvider?
         chat: {
           userId,
           ...(modelProvider && { chat: { modelProvider } }),
-          ...(dateFrom && { chat: { createdAt: { gte: dateFrom } }) })
+          ...(dateFrom && { chat: { createdAt: { gte: dateFrom } } })
         }
       }
     }),
