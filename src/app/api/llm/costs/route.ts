@@ -80,6 +80,11 @@ export async function GET(request: NextRequest) {
     const projections = includeProjections ?
       generateCostProjections(session.user.id, period, messageCosts) : null
 
+    // Validate messageCosts parameter
+    if (messageCosts.dailyBreakdown && !Array.isArray(messageCosts.dailyBreakdown)) {
+      throw new Error('dailyBreakdown must be an array when provided')
+    }
+
     // Calculate cost optimization suggestions
     const suggestions = generateCostOptimizationSuggestions(messageCosts, modelCosts)
 
