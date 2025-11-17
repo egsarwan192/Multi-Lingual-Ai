@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/supabase/server'
+import { securityMiddleware, CSRFProtection } from '@/lib/security'
+import { getRateLimiterForPath } from '@/lib/rateLimit'
 
 // Public routes that don't require authentication
 const publicRoutes = ['/', '/login', '/signup', '/reset-password', '/verify-email']
