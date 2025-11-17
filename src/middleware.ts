@@ -22,7 +22,43 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Apply rate limiting for API routes first
+  // Create response with security headers
+  const response = NextResponse.next()
+
+  // Apply security headers
+  const securityHeaders = securityMiddleware['config'].enableSecurityHeaders !== false ? {
+    'Content-Security-Policy': [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https: blob:",
+      "connect-src 'self' https://api.stripe.com https://*.supabase.co",
+      "frame-src 'self' https://js.stripe.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests"
+    ].join('; '),
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=()',
+    'Cross-Origin-Embedder-Policy': 'require-corp',
+    'Cross-Origin-Resource-Policy': 'same-origin'
+  } : {}
+
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+
+  // Add HSTS in production
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  }
+
+  // Apply rate limiting for API routes
   if (pathname.startsWith('/api/')) {
     const rateLimiter = getRateLimiterForPath(pathname)
     if (rateLimiter) {
@@ -45,26 +81,8 @@ export async function middleware(request: NextRequest) {
           }
         )
       }
-    }
-  }
 
-  // Create response with security headers
-  const response = NextResponse.next()
-
-  // Apply security middleware
-  const securityMiddlewareInstance = securityMiddleware.middleware()
-  const securityResponse = await securityMiddlewareInstance(request)
-
-  // If security middleware returned a response (like CSRF error), use it
-  if (securityResponse.status !== 200) {
-    return securityResponse
-  }
-
-  // Add rate limit headers to successful response
-  if (pathname.startsWith('/api/')) {
-    const rateLimiter = getRateLimiterForPath(pathname)
-    if (rateLimiter) {
-      const rateLimitResult = rateLimiter.check(request)
+      // Add rate limit headers to successful response
       response.headers.set('X-RateLimit-Limit', rateLimiter['config']?.maxRequests?.toString() || '100')
       response.headers.set('X-RateLimit-Remaining', (rateLimitResult.remaining || 0).toString())
       response.headers.set('X-RateLimit-Reset', ((rateLimitResult.resetTime || 0) / 1000).toString())
