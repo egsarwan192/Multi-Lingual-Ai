@@ -1,9 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { SubscriptionTier } from '@prisma/client'
 import { openRouterService } from '@/lib/llm/OpenRouterService'
 import { LLMModel, Message } from '@/lib/llm/types'
 import { persistOptions } from '@/lib/persistConfig'
+
+// Client-side type for subscription tier (instead of importing from @prisma/client)
+export type SubscriptionTier = 'FREE' | 'PREMIUM' | 'PRO'
 
 // Types for chat state
 export interface Chat {
