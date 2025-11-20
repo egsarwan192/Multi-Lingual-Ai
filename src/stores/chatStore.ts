@@ -457,8 +457,6 @@ async function handleStreamingResponse(response: Response, set: any) {
         }
       }
     }
-}
-
 // Convenience selectors
 export const useChat = () => useChatStore()
 export const useCurrentChat = () => useChatStore(state => state.currentChat)
