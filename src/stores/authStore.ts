@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { SubscriptionTier } from '@prisma/client'
 import { persistOptions } from '@/lib/persistConfig'
+
+// Client-side type for subscription tier (instead of importing from @prisma/client)
+export type SubscriptionTier = 'FREE' | 'PREMIUM' | 'PRO'
 
 // Types for auth state
 export interface User {
