@@ -1,4 +1,4 @@
-import { persist, persistOptions } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 import { StateStorage } from 'zustand/middleware'
 
 // Custom storage adapter for localStorage with type safety
