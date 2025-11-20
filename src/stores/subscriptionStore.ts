@@ -1,12 +1,12 @@
+'use client'
+
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { subscriptionPlans } from '@/lib/stripe'
-import { persistOptions } from '@/lib/persistConfig'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Client-side type for subscription tier (instead of importing from @prisma/client)
 export type SubscriptionTier = 'FREE' | 'PREMIUM' | 'PRO'
 
-// Types for subscription state
+// Types for subscription state - updated to allow null values for stub implementation
 export interface UsageLimits {
   dailyMessages: number
   maxTokensPerMessage: number
@@ -21,13 +21,13 @@ export interface UsageStats {
 }
 
 export interface Subscription {
-  id: string
+  id: string | null
   tier: SubscriptionTier
-  status: 'ACTIVE' | 'CANCELED' | 'PAST_DUE' | 'EXPIRED'
-  currentPeriodEnd: Date
-  stripeSubscriptionId: string
-  createdAt: Date
-  updatedAt: Date
+  status: 'ACTIVE' | 'CANCELED' | 'PAST_DUE' | 'EXPIRED' | null
+  currentPeriodEnd: Date | null
+  stripeSubscriptionId: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export interface SubscriptionState {
@@ -56,7 +56,7 @@ export interface SubscriptionActions {
   clearError: () => void
 }
 
-// Initial state
+// Initial state for stub store - always free tier, no subscription
 const initialState: SubscriptionState = {
   currentSubscription: null,
   usage: {
@@ -66,84 +66,43 @@ const initialState: SubscriptionState = {
     lastResetDate: new Date()
   },
   limits: {
-    dailyMessages: 50,
-    maxTokensPerMessage: 2000,
-    monthlyCostLimit: 5.00
+    dailyMessages: Number.POSITIVE_INFINITY, // Unlimited - subscriptions removed
+    maxTokensPerMessage: 32000, // Max allowed - subscriptions removed
+    monthlyCostLimit: Number.POSITIVE_INFINITY // No limit - subscriptions removed
   },
   isLoading: false,
   error: null,
-  upgradeRecommendation: null,
-  canManageBilling: false
+  upgradeRecommendation: null, // No upselling - subscriptions removed
+  canManageBilling: false // No billing management - subscriptions removed
 }
 
-// Create the store with persistence
+/**
+ * STUB SUBSCRIPTION STORE - Subscriptions removed
+ *
+ * This store maintains the same API shape as the original subscriptionStore but with
+ * no-op implementations since subscriptions have been removed from the application.
+ *
+ * All methods return resolved promises to prevent runtime errors where components
+ * attempt to call subscription methods.
+ */
 export const useSubscriptionStore = create<SubscriptionState & SubscriptionActions>(
   persist(
     (set, get) => ({
       ...initialState,
 
-      // Actions
+      // STUB: Subscriptions removed - all methods are no-ops
       getCurrentSubscription: async () => {
-        set({ isLoading: true })
-
-        try {
-          const response = await fetch('/api/subscription/current', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          })
-
-          const data = await response.json()
-
-          if (!response.ok || !data.success) {
-            set({ isLoading: false })
-            return
-          }
-
-          const currentLimits = getLimitsForTier(data.subscription.current.tier)
-          const now = new Date()
-
-          set({
-            currentSubscription: {
-              ...data.subscription.current,
-              status: data.subscription.current.status
-            },
-            usage: data.subscription.current.usage,
-            limits: currentLimits,
-            isLoading: false,
-            canManageBilling: data.subscription.current.status === 'ACTIVE'
-          })
-
-          // Reset daily usage if needed
-          const state = get()
-          if (state.usage.lastResetDate.toDateString() !== now.toDateString()) {
-            set({
-              usage: {
-                ...state.usage,
-                messagesToday: 0,
-                tokensToday: 0,
-                lastResetDate: now
-              }
-            })
-          }
-
-          // Generate upgrade recommendation
-          const recommendation = generateUpgradeRecommendation(
-            data.subscription.current.tier,
-            state.usage,
-            currentLimits
-          )
-
-          set({ upgradeRecommendation: recommendation })
-        } catch (error) {
-          set({ isLoading: false, error: error instanceof Error ? error.message : 'Failed to fetch subscription' })
-        }
+        // TODO: Subscriptions were removed - this is a stub implementation
+        console.warn('Subscriptions removed - getCurrentSubscription() is a no-op')
+        set({ currentSubscription: null, canManageBilling: false })
       },
 
       updateUsage: async (tokensUsed: number, cost = 0) => {
+        // TODO: Subscriptions removed - usage tracking disabled
+        console.warn('Subscriptions removed - updateUsage() is a no-op')
+        // Still update local usage tracking for UI purposes
         try {
           const state = get()
-          const now = new Date()
-
           set({
             usage: {
               ...state.usage,
@@ -152,53 +111,17 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
               lastResetDate: state.usage.lastResetDate
             }
           })
-
-          // Check if user exceeded limits
-          if (state.usage.tokensToday >= state.limits.maxTokensPerMessage) {
-            set({
-              upgradeRecommendation: {
-                tier: 'PREMIUM' as SubscriptionTier,
-                savings: 5.00, // Pro cost savings
-                reason: 'You\'ve reached your daily token limit'
-              }
-            })
-          } else if (state.usage.messagesToday >= state.limits.dailyMessages) {
-            set({
-              upgradeRecommendation: {
-                tier: 'PREMIUM' as SubscriptionTier,
-                savings: 5.00,
-                reason: 'You\'ve reached your daily message limit'
-              }
-            })
-          } else if (state.usage.costThisMonth >= state.limits.monthlyCostLimit * 0.9) {
-            set({
-              upgradeRecommendation: {
-                tier: 'PREMIUM' as SubscriptionTier,
-                savings: 5.00,
-                reason: 'You\'re approaching your monthly cost limit'
-              }
-            })
-          }
         } catch (error) {
           set({ error: error instanceof Error ? error.message : 'Failed to update usage' })
         }
       },
 
       checkLimits: (messageTokens: number) => {
-        const state = get()
-        const canSend =
-          messageTokens <= state.limits.maxTokensPerMessage &&
-          state.usage.messagesToday < state.limits.dailyMessages &&
-          state.usage.costThisMonth < state.limits.monthlyCostLimit
-
+        // TODO: Subscriptions removed - no limits, always allow sending
+        console.warn('Subscriptions removed - checkLimits() always returns true')
         return {
-          canSend,
-          reason: !canSend ? (
-            messageTokens > state.limits.maxTokensPerMessage ? 'Message exceeds token limit' :
-            state.usage.messagesToday >= state.limits.dailyMessages ? 'Daily message limit reached' :
-            state.usage.costThisMonth >= state.limits.monthlyCostLimit ? 'Monthly cost limit exceeded' :
-            undefined
-          ) : undefined
+          canSend: true, // Always true - no limits
+          reason: undefined // No reason - always allowed
         }
       },
 
@@ -214,17 +137,15 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
       },
 
       setUpgradeRecommendation: (tier: SubscriptionTier, savings: number, reason: string) => {
-        set({
-          upgradeRecommendation: {
-            tier,
-            savings,
-            reason
-          }
-        })
+        // TODO: Subscriptions removed - no upgrade recommendations
+        console.warn('Subscriptions removed - setUpgradeRecommendation() is a no-op')
+        set({ upgradeRecommendation: null })
       },
 
       setCanManageBilling: (canManage: boolean) => {
-        set({ canManageBilling })
+        // TODO: Subscriptions removed - no billing management
+        console.warn('Subscriptions removed - setCanManageBilling() is a no-op')
+        set({ canManageBilling: false })
       },
 
       clearUpgradeRecommendation: () => {
@@ -239,128 +160,76 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         set({ error: null })
       }
     }),
-    persistOptions
+    {
+      name: 'subscription-storage',
+      storage: createJSONStorage(() => localStorage),
+      // Only persist basic usage stats, no subscription data
+      partialize: (state) => ({
+        usage: state.usage,
+        limits: state.limits,
+        currentSubscription: null,
+        canManageBilling: false,
+        upgradeRecommendation: null,
+        error: null
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Always ensure no subscription state
+          state.currentSubscription = null
+          state.canManageBilling = false
+          state.upgradeRecommendation = null
+          // Ensure unlimited limits
+          state.limits = {
+            dailyMessages: Number.POSITIVE_INFINITY,
+            maxTokensPerMessage: 32000,
+            monthlyCostLimit: Number.POSITIVE_INFINITY
+          }
+        }
+      },
+    }
   )
 )
 
-// Helper functions
-function getLimitsForTier(tier: SubscriptionTier): UsageLimits {
-  switch (tier) {
-    case 'FREE':
-      return {
-        dailyMessages: 50,
-        maxTokensPerMessage: 2000,
-        monthlyCostLimit: 5.00
-      }
-    case 'PREMIUM':
-      return {
-        dailyMessages: 500,
-        maxTokensPerMessage: 8000,
-        monthlyCostLimit: 50.00
-      }
-    case 'PRO':
-      return {
-        dailyMessages: Number.POSITIVE_INFINITY,
-        maxTokensPerMessage: 32000,
-        monthlyCostLimit: 250.00
-      }
-    default:
-      return {
-        dailyMessages: 50,
-        maxTokensPerMessage: 2000,
-        monthlyCostLimit: 5.00
-      }
-  }
-}
-
-function generateUpgradeRecommendation(
-  currentTier: SubscriptionTier,
-  usage: UsageStats,
-  limits: UsageLimits
-): SubscriptionState['upgradeRecommendation'] {
-  // Check if upgrade is beneficial based on usage patterns
-  const usagePercentage = limits.dailyMessages > 0 ? (usage.messagesToday / limits.dailyMessages) * 100 : 0
-  const costPercentage = limits.monthlyCostLimit > 0 ? (usage.costThisMonth / limits.monthlyCostLimit) * 100 : 0
-
-  // Recommend upgrade if usage is high
-  if (usagePercentage > 80 || costPercentage > 80) {
-    return {
-      tier: currentTier === 'FREE' ? 'PREMIUM' : 'PRO',
-      savings: calculateUpgradeSavings(currentTier),
-      reason: usagePercentage > 80 ? 'High usage - upgrade recommended' : 'High costs - upgrade recommended'
-    }
-  }
-
-  return null
-}
-
-function calculateUpgradeSavings(currentTier: SubscriptionTier): number {
-  const plans = subscriptionPlans
-
-  if (currentTier === 'FREE') {
-    // Potential savings of using premium instead of pay-per-use
-    return 2.50 // Mock average savings
-  }
-
-  if (currentTier === 'PREMIUM') {
-    // Savings of pro vs premium
-    return plans.pro.price - plans.premium.price
-  }
-
-  return 0
-}
-
-// Convenience selectors
-export const useCurrentSubscription = () => useSubscriptionStore(state => state.currentSubscription)
+// Convenience selectors - return stub values
+export const useCurrentSubscription = () => null // Always null - subscriptions removed
 export const useUsage = () => useSubscriptionStore(state => state.usage)
 export const useLimits = () => useSubscriptionStore(state => state.limits)
-export const useUpgradeRecommendation = () => useSubscriptionStore(state => state.upgradeRecommendation)
-export const useCanManageBilling = () => useSubscriptionStore(state => state.canManageBilling)
+export const useUpgradeRecommendation = () => null // Always null - no upselling
+export const useCanManageBilling = () => false // Always false - no billing management
 export const useIsSubscriptionLoading = () => useSubscriptionStore(state => state.isLoading)
 export const useSubscriptionError = () => useSubscriptionStore(state => state.error)
 
-// Derived selectors
+// Derived selectors - return stub values
 export const useCanSendMessage = (messageTokens: number) => {
-  const { limits, usage } = useSubscriptionStore(state => ({ limits, usage }))
-
+  // Always true - no limits when subscriptions are removed
   return {
-    canSend: messageTokens <= limits.maxTokensPerMessage && usage.messagesToday < limits.dailyMessages,
-    remainingMessages: limits.dailyMessages - usage.messagesToday,
-    remainingTokens: limits.maxTokensPerMessage - messageTokens
+    canSend: true,
+    remainingMessages: Number.POSITIVE_INFINITY,
+    remainingTokens: 32000 - messageTokens
   }
 }
 
 export const useSubscriptionTier = () => {
-  const { currentSubscription } = useSubscriptionStore(state => state.currentSubscription)
-  return currentSubscription?.tier || 'FREE'
+  // Always return PRO tier equivalent (full access) when subscriptions are removed
+  return 'PRO'
 }
 
 export const useIsSubscriptionActive = () => {
-  const { currentSubscription } = useSubscriptionStore(state => state.currentSubscription)
-  return currentSubscription?.status === 'ACTIVE'
+  // Always true - full access when subscriptions are removed
+  return true
 }
 
 export const useSubscriptionDaysLeft = () => {
-  const { currentSubscription } = useSubscriptionStore(state => state.currentSubscription)
-
-  if (!currentSubscription || !currentSubscription.currentPeriodEnd) {
-    return 0
-  }
-
-  const now = new Date()
-  const periodEnd = new Date(currentSubscription.currentPeriodEnd)
-  const diffMs = periodEnd.getTime() - now.getTime()
-
-  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
+  // Always return 0 - no subscription when subscriptions are removed
+  return 0
 }
 
 export const useMonthlyUsage = () => {
-  const { usage } = useSubscriptionStore(state => state.usage)
-  return usage.costThisMonth
+  // Still return actual usage for UI purposes, but it's not limited
+  return useSubscriptionStore(state => state.usage.costThisMonth)
 }
 
 export const useDailyUsagePercentage = () => {
-  const { limits, usage } = useSubscriptionStore(state => ({ limits, usage }))
-
-  return limits.dailyMessages > 0 ? (usage.messagesToday / limits.dailyMessages) * 100 : 0
+  // Always return 0% - no daily limits when subscriptions are removed
+  return 0
 }
