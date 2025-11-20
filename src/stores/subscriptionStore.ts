@@ -229,6 +229,14 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       clearUpgradeRecommendation: () => {
         set({ upgradeRecommendation: null })
+      },
+
+      setError: (error: string | null) => {
+        set({ error })
+      },
+
+      clearError: () => {
+        set({ error: null })
       }
     }),
     persistOptions
