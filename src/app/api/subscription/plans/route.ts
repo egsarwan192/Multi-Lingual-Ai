@@ -100,9 +100,9 @@ export async function GET(request: NextRequest) {
         },
         nextReset: {
           dailyMessages: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
-          monthlyCost: new Date(new Date().getDate() === 1 ?
-            new Date().getFullYear(), new Date().getMonth() + 1, 0) :
-            new Date().getFullYear(), new Date().getMonth() + 2, 0
+          monthlyCost: new Date(new Date().getFullYear(),
+            new Date().getDate() === 1 ? new Date().getMonth() + 1 : new Date().getMonth() + 2,
+            0
           ).toISOString()
         }
       },
