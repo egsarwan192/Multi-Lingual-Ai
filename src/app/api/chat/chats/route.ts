@@ -17,15 +17,8 @@ const createChatSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current session
-    const session = await getSession()
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'no_session' },
-        { status: 401 }
-      )
-    }
+    // TODO: Authentication removed - chat API is now public
+    console.warn('Authentication removed - chat listing API is now public')
 
     // Parse query parameters for pagination
     const { searchParams } = new URL(request.url)
@@ -33,9 +26,9 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100) // Max 100 per request
     const skip = (page - 1) * limit
 
-    // Get user's chats with pagination
+    // Get public chats (no user filter since auth is removed)
+    // In a real implementation, you might want to create a system user or handle this differently
     const chats = await prisma.chat.findMany({
-      where: { userId: session.user.id },
       include: {
         messages: {
           take: 1, // Just get first message for preview
@@ -67,10 +60,8 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Get total count for pagination
-    const total = await prisma.chat.count({
-      where: { userId: session.user.id }
-    })
+    // Get total count for pagination (no user filter)
+    const total = await prisma.chat.count()
 
     // Transform chats for response
     const transformedChats = chats.map(chat => ({
