@@ -1,8 +1,7 @@
 'use client'
 
 import { useChatStore } from '@/stores/chatStore'
-import { LLMModel } from '@/lib/llm/types'
-import { ModelProvider } from '@prisma/client'
+import { LLMModel, ModelProvider } from '@/lib/llm/types'
 
 interface ModelSelectorProps {
   className?: string
