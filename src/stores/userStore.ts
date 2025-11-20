@@ -64,10 +64,10 @@ export interface UserActions {
   updateUsageStats: () => Promise<void>
 }
 
-// Initial state
+// Initial state with mock data for development
 const initialState: UserState = {
-  user: null,
-  subscription: null,
+  user: mockUser,
+  subscription: mockSubscription,
   isLoading: false,
   error: null
 }
