@@ -14,26 +14,18 @@ const sendMessageSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Get current session
-    const session = await getSession()
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'no_session' },
-        { status: 401 }
-      )
-    }
+    // TODO: Authentication removed - all chat access is now public
+    console.warn('Authentication removed - chat message API is now public')
 
     // Validate request body
     const body = await request.json()
     const validatedData = sendMessageSchema.parse(body)
     const { chatId, message, stream } = validatedData
 
-    // Get chat and validate user ownership
+    // Get chat (no user ownership validation since auth is removed)
     const chat = await prisma.chat.findFirst({
       where: {
-        id: chatId,
-        userId: session.user.id
+        id: chatId
       },
       include: {
         messages: {
@@ -50,46 +42,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user's subscription tier
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { subscriptionTier: true }
-    })
+    // TODO: Subscriptions removed - use PRO tier equivalent (full access)
+    const userSubscriptionTier = 'PRO'
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found', code: 'user_not_found' },
-        { status: 404 }
-      )
-    }
-
-    // Check if user has access to the chat's model
-    const availableModels = openRouterService.getModelsByTier(user.subscriptionTier)
+    // Check if model is available (all models available for PRO tier)
+    const availableModels = openRouterService.getModelsByTier('PRO')
     const modelAvailable = availableModels.some(m =>
       m.provider === chat.modelProvider && m.id === chat.modelName
     )
 
     if (!modelAvailable) {
       return NextResponse.json(
-        { error: 'Model not available for your subscription tier', code: 'model_not_allowed' },
+        { error: 'Model not available', code: 'model_not_available' },
         { status: 403 }
       )
     }
 
-    // Check usage limits before sending
+    // TODO: Subscriptions removed - no usage limits
     const messageTokens = openRouterService.estimateTokens(message)
-    const canSend = openRouterService.canSendMessage(
-      session.user.id,
-      user.subscriptionTier,
-      messageTokens
-    )
-
-    if (!canSend.canSend) {
-      return NextResponse.json(
-        { error: canSend.reason, code: 'usage_limit' },
-        { status: 429 }
-      )
-    }
+    // Always allow sending since limits are removed
 
     // Convert chat messages to OpenRouter format
     const conversation: Message[] = chat.messages.map(msg => ({
