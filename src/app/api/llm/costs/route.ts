@@ -10,7 +10,7 @@ type ModelProvider = 'OPENAI' | 'ANTHROPIC' | 'GOOGLE' | 'DEEPSEEK'
 // Validation schema for cost analysis query parameters
 const costsQuerySchema = z.object({
   period: z.enum(['day', 'week', 'month', 'year']).optional().default('month'),
-  modelProvider: z.nativeEnum(ModelProvider).optional(),
+  modelProvider: z.enum(['OPENAI', 'ANTHROPIC', 'GOOGLE', 'DEEPSEEK']).optional(),
   modelId: z.string().optional(),
   dateFrom: z.string().optional().transform(val => new Date(val)),
   dateTo: z.string().optional().transform(val => new Date(val)),
