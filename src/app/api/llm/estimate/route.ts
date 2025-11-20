@@ -114,7 +114,6 @@ export async function POST(request: NextRequest) {
           fastest: multiModelEstimates.sort((a, b) => b.model.provider.localeCompare(a.model.provider))[0], // OpenAI often fastest
           balanced: getBalancedModel(multiModelEstimates)
         }
-      }
       })
     })
   } catch (error) {
