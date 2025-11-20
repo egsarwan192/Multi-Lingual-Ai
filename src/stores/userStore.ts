@@ -129,66 +129,24 @@ export const useUserStore = create<UserState & UserActions>()(
         }
       },
 
-      // Refresh user data
+      // Refresh user data (mock implementation)
       refreshUser: async () => {
         set({ isLoading: true, error: null })
 
-        try {
-          const response = await fetch('/api/user/profile', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          })
-
-          if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Failed to refresh user data')
-          }
-
-          const { user, subscription } = await response.json()
-
+        // Mock implementation - just ensure mock data is set
+        setTimeout(() => {
           set({
-            user,
-            subscription,
+            user: mockUser,
+            subscription: mockSubscription,
             isLoading: false
           })
-        } catch (error) {
-          set({
-            isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to refresh user data'
-          })
-        }
+        }, 300) // Simulate API delay
       },
 
-      // Update usage statistics
+      // Update usage statistics (mock implementation)
       updateUsageStats: async () => {
-        try {
-          const response = await fetch('/api/user/usage', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          })
-
-          if (!response.ok) {
-            console.warn('Failed to update usage stats')
-            return
-          }
-
-          const stats = await response.json()
-
-          // Update user with new usage stats if user exists
-          set(state => {
-            if (state.user) {
-              return {
-                user: {
-                  ...state.user,
-                  usage: stats.usage
-                }
-              }
-            }
-            return state
-          })
-        } catch (error) {
-          console.error('Error updating usage stats:', error)
-        }
+        // Mock implementation - no actual API call
+        console.log('Usage stats update: mocked (no authentication)')
       }
     }),
     persistOptions
