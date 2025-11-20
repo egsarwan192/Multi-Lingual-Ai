@@ -406,7 +406,7 @@ function getModelProviderFromId(modelId: string): string {
 }
 
 // Helper function to handle streaming responses
-async function handleStreamingResponse(response: Response, set: any) {
+async function handleStreamingResponse(response: Response, set: any, get: any) {
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
 
