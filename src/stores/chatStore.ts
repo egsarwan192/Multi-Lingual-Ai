@@ -462,6 +462,7 @@ async function handleStreamingResponse(response: Response, set: any) {
       }
     }
 }
+}
 
 // Convenience selectors
 export const useChat = () => useChatStore()
