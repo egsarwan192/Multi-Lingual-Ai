@@ -227,8 +227,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load chat'
-          })
+            error: error instanceof Error ? error.message : 'Failed to load chat' })
         }
       },
 
@@ -261,8 +260,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to delete chat'
-          })
+            error: error instanceof Error ? error.message : 'Failed to delete chat' })
         }
       },
 
@@ -301,8 +299,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to update chat'
-          })
+            error: error instanceof Error ? error.message : 'Failed to update chat' })
         }
       },
 
@@ -376,8 +373,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load history'
-          })
+            error: error instanceof Error ? error.message : 'Failed to load history' })
         }
       },
 
