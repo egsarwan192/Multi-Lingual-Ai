@@ -36,7 +36,7 @@ export const localStorageAdapter: StateStorage = {
 }
 
 // Configuration options for persistence
-export const persistOptions: persistOptions<any, StateStorage> = {
+export const persistOptions = {
   name: 'multillm-app-storage',
   storage: localStorageAdapter,
   partialize: (state: any) => {
@@ -77,9 +77,9 @@ export const persistOptions: persistOptions<any, StateStorage> = {
       }
     }
   },
-  onRehydrateStorage: (state: any) => {
+  onRehydrateStorage: () => (state: any) => {
     // Called after hydration
-    console.log('State hydrated from localStorage:', state)
+    console.log('State hydrated from localStorage')
   },
   version: 1 // Version the storage schema
 }
