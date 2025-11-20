@@ -198,7 +198,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             state.usage.messagesToday >= state.limits.dailyMessages ? 'Daily message limit reached' :
             state.usage.costThisMonth >= state.limits.monthlyCostLimit ? 'Monthly cost limit exceeded' :
             undefined
-          )
+          ) : undefined
         }
       },
 
