@@ -31,6 +31,27 @@ export interface UserState {
   error: string | null
 }
 
+// Mock user data for development without authentication
+const mockUser: User = {
+  id: 'mock-user-id',
+  email: 'demo@example.com',
+  displayName: 'Demo User',
+  subscriptionTier: 'FREE',
+  createdAt: new Date(),
+  updatedAt: new Date()
+}
+
+const mockSubscription: Subscription = {
+  id: 'mock-subscription-id',
+  userId: 'mock-user-id',
+  tier: 'FREE',
+  status: 'active',
+  currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+  stripeSubscriptionId: 'mock-stripe-id',
+  createdAt: new Date(),
+  updatedAt: new Date()
+}
+
 export interface UserActions {
   setUser: (user: User) => void
   updateProfile: (updates: Partial<User>) => Promise<void>
