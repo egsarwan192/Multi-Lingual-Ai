@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useChatStore } from '@/stores/chatStore'
-import { Button } from '@/components/ui/Button'
+import Button from '@/components/ui/Button'
 import { ChatHistoryItem } from '@/stores/chatStore'
 
 interface ChatSidebarProps {

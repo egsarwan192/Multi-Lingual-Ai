@@ -2,7 +2,7 @@
 
 import { useState, useRef, KeyboardEvent } from 'react'
 import { useChatStore } from '@/stores/chatStore'
-import { Button } from '@/components/ui/Button'
+import Button from '@/components/ui/Button'
 
 interface MessageInputProps {
   className?: string

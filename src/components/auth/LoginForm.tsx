@@ -6,8 +6,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useLogin } from '@/stores/authStore'
-import { Button } from '@/components/ui/Button'
+import { useAuthStore } from '@/stores/authStore'
+import Button from '@/components/ui/Button'
+
+
+type LoginFormProps = {
+  onSuccess?: () => void
+}
+
 
 // Login form validation schema
 const loginSchema = z.object({
@@ -18,17 +24,20 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginForm() {
+export default function LoginForm({ onSuccess }: LoginFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const login = useLogin()
+  const { login, error } = useAuthStore(state => ({
+    login: state.login,
+    error: state.error
+  }))
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -38,15 +47,22 @@ export default function LoginForm() {
     }
   })
 
+  const { errors, isSubmitting } = formState
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
 
     try {
+      // call the login function from your store (make sure login is a function)
       await login(data.email, data.password, data.remember)
 
-      // Redirect to intended page or chat
-      const returnTo = searchParams.get('returnTo')
-      router.push(returnTo || '/chat')
+      // if parent passed onSuccess, call it; otherwise redirect to returnTo or /chat
+      if (typeof onSuccess === 'function') {
+        onSuccess()
+      } else {
+        const returnTo = searchParams.get('returnTo')
+        router.push(returnTo || '/chat')
+      }
     } catch (error) {
       console.error('Login failed:', error)
       setIsLoading(false)
@@ -74,7 +90,7 @@ export default function LoginForm() {
           </div>
 
           {/* Error Display */}
-          {(formState.errors.root || login.error) && (
+          {(errors?.root || error) && (
             <div className="rounded-md bg-red-50 p-4 mb-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -82,14 +98,16 @@ export default function LoginForm() {
                     <User className="w-3 h-3 text-white" />
                   </div>
                 </div>
+
                 <div className="ml-3 text-sm text-red-700">
                   <p className="font-medium">
-                    {formState.errors.root?.message || login.error}
+                    {errors?.root?.message || error}
                   </p>
                 </div>
               </div>
             </div>
           )}
+
 
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {/* Email Field */}
@@ -110,11 +128,12 @@ export default function LoginForm() {
                   disabled={isSubmitting}
                 />
               </div>
-              {formState.errors.email && (
+              {errors?.email && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.email.message}
+                  {errors?.email?.message}
                 </p>
               )}
+
             </div>
 
             {/* Password Field */}
@@ -146,9 +165,9 @@ export default function LoginForm() {
                   )}
                 </button>
               </div>
-              {formState.errors.password && (
+              {errors?.password && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.password.message}
+                  {errors?.password?.message}
                 </p>
               )}
             </div>
@@ -181,11 +200,12 @@ export default function LoginForm() {
               <Button
                 type="submit"
                 disabled={isSubmitting || isLoading}
-                isLoading={isLoading || isSubmitting}
+                loading={isLoading || isSubmitting}
                 className="w-full"
               >
                 {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
               </Button>
+
             </div>
 
             {/* Sign Up Link */}

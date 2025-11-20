@@ -4,11 +4,14 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, Mail, User, UserPlus } from 'lucide-react'
+import { Eye, EyeOff, Mail, User, UserPlus, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useLogin } from '@/stores/authStore'
-import { Button } from '@/components/ui/Button'
+import { useAuthStore } from '@/stores/authStore' 
+import Button from '@/components/ui/Button'
 
+type SignupFormProps = {
+  onSuccess?: () => void
+}
 // Signup form validation schema
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters'),
@@ -25,11 +28,10 @@ const signupSchema = z.object({
 
 type SignupFormData = z.infer<typeof signupSchema>
 
-export default function SignupForm() {
+export default function SignupForm({ onSuccess }: SignupFormProps) {
   const router = useRouter()
-  const login = useLogin()
+  const signup = useAuthStore(state => state.signup)
   const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
     register,
@@ -47,18 +49,21 @@ export default function SignupForm() {
   })
 
   const onSubmit = async (data: SignupFormData) => {
-    setIsSubmitting(true)
+  try {
+    await signup(data.email, data.password, data.confirmPassword)
 
-    try {
-      await login.signup(data.email, data.password, data.confirmPassword)
-
-      // Redirect to login after successful signup
+    // If parent passed onSuccess, call it
+    if (typeof onSuccess === 'function') {
+      onSuccess()
+    } else {
+      // fallback redirect
       router.push('/login?message=signup_success')
-    } catch (error) {
-      setIsSubmitting(false)
-      console.error('Signup failed:', error)
     }
+  } catch (error) {
+    console.error('Signup failed:', error)
   }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -72,8 +77,8 @@ export default function SignupForm() {
             </p>
           </div>
 
-          {/* Error Display */}
-          {formState.errors.root && (
+          {/* Root error */}
+          {errors.root && (
             <div className="rounded-md bg-red-50 p-4 mb-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -83,7 +88,7 @@ export default function SignupForm() {
                 </div>
                 <div className="ml-3 text-sm text-red-700">
                   <p className="font-medium">
-                    {formState.errors.root.message}
+                    {errors.root.message}
                   </p>
                 </div>
               </div>
@@ -109,9 +114,9 @@ export default function SignupForm() {
                   disabled={isSubmitting}
                 />
               </div>
-              {formState.errors.name && (
+              {errors.name && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.name.message}
+                  {errors.name.message}
                 </p>
               )}
             </div>
@@ -134,9 +139,9 @@ export default function SignupForm() {
                   disabled={isSubmitting}
                 />
               </div>
-              {formState.errors.email && (
+              {errors.email && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.email.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -170,9 +175,9 @@ export default function SignupForm() {
                   )}
                 </button>
               </div>
-              {formState.errors.password && (
+              {errors.password && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.password.message}
+                  {errors.password.message}
                 </p>
               )}
             </div>
@@ -195,9 +200,9 @@ export default function SignupForm() {
                   disabled={isSubmitting}
                 />
               </div>
-              {formState.errors.confirmPassword && (
+              {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.confirmPassword.message}
+                  {errors.confirmPassword.message}
                 </p>
               )}
             </div>
@@ -216,6 +221,7 @@ export default function SignupForm() {
                   href="/terms"
                   className="text-blue-600 hover:text-blue-500 underline"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   Terms and Conditions
                 </a>
@@ -225,13 +231,14 @@ export default function SignupForm() {
                   href="/privacy"
                   className="text-blue-600 hover:text-blue-500 underline"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   Privacy Policy
                 </a>
               </label>
-              {formState.errors.agreeToTerms && (
+              {errors.agreeToTerms && (
                 <p className="mt-1 text-sm text-red-600">
-                  {formState.errors.agreeToTerms.message}
+                  {errors.agreeToTerms.message}
                 </p>
               )}
             </div>
@@ -241,7 +248,7 @@ export default function SignupForm() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                isLoading={isSubmitting}
+                loading={isSubmitting}
                 className="w-full"
               >
                 {isSubmitting ? 'Creating account...' : 'Create account'}

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LoginForm } from '@/components/auth/LoginForm'
-import { SignupForm } from '@/components/auth/SignupForm'
-import { Button } from '@/components/ui/Button'
+import LoginForm from '@/components/auth/LoginForm'
+import SignupForm  from '@/components/auth/SignupForm'
+import Button from '@/components/ui/Button'
 import { useUserStore } from '@/stores/userStore'
 
 export default function HomePage() {

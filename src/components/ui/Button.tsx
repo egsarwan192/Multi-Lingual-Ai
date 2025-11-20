@@ -1,6 +1,7 @@
 import React from 'react'
 import { cva } from 'class-variance-authority'
 
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -36,15 +37,16 @@ export default function Button({
     xl: 'px-8 py-4 text-lg'
   }
 
-  const classes = cva(
+  const classes = [
     baseClasses,
     variantClasses[variant],
     sizeClasses[size],
-    disabled,
-    loading,
-    className
-  )
-
+    loading ? 'opacity-75 pointer-events-none' : '',
+    disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '',
+    className || ''
+  ]
+    .filter(Boolean)
+    .join(' ')
   return (
     <button
       className={classes}

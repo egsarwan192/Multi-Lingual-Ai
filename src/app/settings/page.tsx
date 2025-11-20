@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
+import Button from '@/components/ui/Button'
 import { useUserStore } from '@/stores/userStore'
 
 type SettingsTab = 'profile' | 'subscription' | 'preferences' | 'notifications' | 'security'
