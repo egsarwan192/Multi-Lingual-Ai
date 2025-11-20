@@ -227,7 +227,8 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load chat' })
+            error: error instanceof Error ? error.message : 'Failed to load chat'
+          })
         }
       },
 
