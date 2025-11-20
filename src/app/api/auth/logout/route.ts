@@ -1,46 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
-  try {
-    // Create Supabase client
-    const supabase = await createServerClient()
+/**
+ * STUB AUTH ROUTE - Authentication removed
+ *
+ * TODO: Authentication was removed from this application.
+ * This route returns a 404 response indicating that authentication is no longer available.
+ *
+ * This stub maintains the API route structure to prevent import errors while
+ * clearly indicating that the authentication functionality has been removed.
+ */
 
-    // Sign out from Supabase
-    const { error } = await supabase.auth.signOut()
-
-    if (error) {
-      console.error('Logout error:', error)
-      return NextResponse.json(
-        { error: 'Failed to sign out' },
-        { status: 500 }
-      )
-    }
-
-    // Clear session cookies
-    const cookieStore = await cookies()
-
-    cookieStore.delete('sb-access-token', { path: '/' })
-    cookieStore.delete('sb-refresh-token', { path: '/' })
-
-    // Return success response
-    return NextResponse.json({
-      success: true,
-      message: 'Successfully signed out'
-    })
-  } catch (error) {
-    console.error('Logout error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'Authentication removed',
+      code: 'auth_removed',
+      message: 'Authentication functionality has been removed from this application.'
+    },
+    { status: 404 }
+  )
 }
 
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
+    {
+      error: 'Authentication removed',
+      code: 'auth_removed',
+      message: 'Authentication functionality has been removed from this application.'
+    },
+    { status: 404 }
   )
 }
