@@ -52,6 +52,8 @@ export interface SubscriptionActions {
   setUpgradeRecommendation: (tier: SubscriptionTier, savings: number, reason: string) => void
   setCanManageBilling: (canManage: boolean) => void
   clearUpgradeRecommendation: () => void
+  setError: (error: string | null) => void
+  clearError: () => void
 }
 
 // Initial state
