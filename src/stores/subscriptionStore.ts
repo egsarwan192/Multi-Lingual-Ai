@@ -35,6 +35,7 @@ export interface SubscriptionState {
   usage: UsageStats
   limits: UsageLimits
   isLoading: boolean
+  error: string | null
   upgradeRecommendation: {
     tier: SubscriptionTier | null
     savings: number
