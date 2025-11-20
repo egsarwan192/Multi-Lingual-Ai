@@ -82,34 +82,17 @@ export const useUserStore = create<UserState & UserActions>()(
         set({ user, error: null })
       },
 
-      // Update user profile
+      // Update user profile (mock implementation)
       updateProfile: async (updates: Partial<User>) => {
         set({ isLoading: true, error: null })
 
-        try {
-          const response = await fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updates)
-          })
-
-          if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Failed to update profile')
-          }
-
-          const updatedUser = await response.json()
-
+        // Mock implementation - just update local state
+        setTimeout(() => {
           set(state => ({
-            user: { ...state.user!, ...updatedUser.user },
+            user: state.user ? { ...state.user, ...updates, updatedAt: new Date() } : null,
             isLoading: false
           }))
-        } catch (error) {
-          set({
-            isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to update profile'
-          })
-        }
+        }, 500) // Simulate API delay
       },
 
       // Set subscription
