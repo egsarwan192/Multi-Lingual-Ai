@@ -92,11 +92,12 @@ export async function POST(request: NextRequest) {
     if (!stream) {
       // Non-streaming response (fallback)
       try {
+        // TODO: Authentication removed - use generic user ID for public access
         const response = await openRouterService.sendMessage(
           message,
           conversation,
           chat.modelName,
-          session.user.id
+          'public-user'
         )
 
         // Save assistant response to database
