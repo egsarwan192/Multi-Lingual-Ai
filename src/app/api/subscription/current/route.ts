@@ -124,8 +124,8 @@ export async function GET(request: NextRequest) {
         current: currentUsage,
         limits: limits,
         percentages: {
-          messagesUsed: Math.min(100, Math.round(usagePercentage * 100) / 100,
-          costUsed: Math.min(100, Math.round(costPercentage * 100) / 100
+          messagesUsed: Math.min(100, Math.round(usagePercentage * 100) / 100),
+          costUsed: Math.min(100, Math.round(costPercentage * 100) / 100)
         },
         resetTimes: {
           dailyMessages: new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString(),
