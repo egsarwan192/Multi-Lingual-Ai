@@ -426,7 +426,7 @@ function generateCostOptimizationSuggestions(
       priority: 'high',
       title: 'Consider using more cost-effective models',
       description: `Your most expensive model ${mostExpensive.modelName} costs ${mostExpensive.averageCostPerMessage.toFixed(4)} per message on average`,
-      recommendation: 'Try switching to ${mostExpensive.provider === 'OPENAI' ? 'Gemini or Deepseek' : 'GPT-3.5 Turbo'} for similar quality at lower cost`
+      recommendation: `Try switching to ${mostExpensive.provider === 'OPENAI' ? 'Gemini or Deepseek' : 'GPT-3.5 Turbo'} for similar quality at lower cost`
     })
   }
 
