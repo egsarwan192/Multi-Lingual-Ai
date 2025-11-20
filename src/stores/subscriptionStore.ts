@@ -71,6 +71,7 @@ const initialState: SubscriptionState = {
     monthlyCostLimit: 5.00
   },
   isLoading: false,
+  error: null,
   upgradeRecommendation: null,
   canManageBilling: false
 }
