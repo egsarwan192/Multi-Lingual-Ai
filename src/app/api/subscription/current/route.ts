@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { openRouterService } from '@/lib/llm/OpenRouterService'
-import { SubscriptionTier } from '@prisma/client'
+
+// Server-side SubscriptionTier type (matches Prisma schema)
+type SubscriptionTier = 'FREE' | 'PREMIUM' | 'PRO'
 
 export async function GET(request: NextRequest) {
   try {
