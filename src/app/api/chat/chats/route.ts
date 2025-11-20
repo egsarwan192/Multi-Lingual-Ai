@@ -3,7 +3,9 @@ import { createServerClient, getSession } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { openRouterService } from '@/lib/llm/OpenRouterService'
 import { z } from 'zod'
-import { ModelProvider } from '@prisma/client'
+
+// Server-side ModelProvider type (matches Prisma schema)
+type ModelProvider = 'OPENAI' | 'ANTHROPIC' | 'GOOGLE' | 'DEEPSEEK'
 
 // Validation schema for creating a new chat
 const createChatSchema = z.object({
