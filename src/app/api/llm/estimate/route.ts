@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
           balanced: getBalancedModel(multiModelEstimates)
         }
       }
+      })
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
