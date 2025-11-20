@@ -98,65 +98,36 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get current session
-    const session = await getSession()
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'no_session' },
-        { status: 401 }
-      )
-    }
-
-    // Get user's subscription tier for model access validation
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { subscriptionTier: true }
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found', code: 'user_not_found' },
-        { status: 404 }
-      )
-    }
+    // TODO: Authentication removed - chat creation API is now public
+    console.warn('Authentication removed - chat creation API is now public')
 
     // Validate request body
     const body = await request.json()
     const validatedData = createChatSchema.parse(body)
     const { title, modelProvider, modelName, initialMessage } = validatedData
 
-    // Check if user has access to this model
-    const availableModels = openRouterService.getModelsByTier(user.subscriptionTier)
+    // TODO: Subscriptions removed - use PRO tier equivalent (full access)
+    const availableModels = openRouterService.getModelsByTier('PRO')
     const requestedModel = availableModels.find(m =>
       m.provider === modelProvider && m.id === modelName
     )
 
     if (!requestedModel) {
       return NextResponse.json(
-        { error: 'Model not available for your subscription tier', code: 'model_not_allowed' },
+        { error: 'Model not available', code: 'model_not_available' },
         { status: 403 }
       )
     }
 
-    // Check usage limits
-    const canSend = openRouterService.canSendMessage(
-      session.user.id,
-      user.subscriptionTier,
-      openRouterService.estimateTokens(initialMessage)
-    )
+    // TODO: Subscriptions removed - no usage limits
+    // Always allow chat creation since limits are removed
 
-    if (!canSend.canSend) {
-      return NextResponse.json(
-        { error: canSend.reason, code: 'usage_limit' },
-        { status: 429 }
-      )
-    }
-
-    // Create chat in database
+    // Create chat in database (use a system user ID since auth is removed)
+    // In production, you might want to create a dedicated system user or handle this differently
+    const systemUserId = 'system-public-user'
     const chat = await prisma.chat.create({
       data: {
-        userId: session.user.id,
+        userId: systemUserId,
         title,
         modelProvider,
         modelName
