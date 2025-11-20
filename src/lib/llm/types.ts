@@ -3,8 +3,9 @@ export type ModelProvider = 'OPENAI' | 'ANTHROPIC' | 'GOOGLE' | 'DEEPSEEK'
 
 export interface LLMProvider {
   name: string
-  models: LLMModel[]
+  availableModels: LLMModel[]
   sendMessage(message: string, conversation: Message[], modelId: string): Promise<LLMResponse>
+  sendMessageStream(message: string, conversation: Message[], modelId: string): Promise<ReadableStream<Uint8Array>>
   validateToken(apiKey: string): Promise<boolean>
   estimateTokens(text: string): number
 }
@@ -35,6 +36,11 @@ export interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp?: Date
+  tokenUsage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
 }
 
 export interface UsageLimits {

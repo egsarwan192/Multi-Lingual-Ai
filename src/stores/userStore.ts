@@ -31,6 +31,27 @@ export interface UserState {
   error: string | null
 }
 
+// Mock user data for development without authentication
+const mockUser: User = {
+  id: 'mock-user-id',
+  email: 'demo@example.com',
+  displayName: 'Demo User',
+  subscriptionTier: 'FREE',
+  createdAt: new Date(),
+  updatedAt: new Date()
+}
+
+const mockSubscription: Subscription = {
+  id: 'mock-subscription-id',
+  userId: 'mock-user-id',
+  tier: 'FREE',
+  status: 'active',
+  currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+  stripeSubscriptionId: 'mock-stripe-id',
+  createdAt: new Date(),
+  updatedAt: new Date()
+}
+
 export interface UserActions {
   setUser: (user: User) => void
   updateProfile: (updates: Partial<User>) => Promise<void>
@@ -43,10 +64,10 @@ export interface UserActions {
   updateUsageStats: () => Promise<void>
 }
 
-// Initial state
+// Initial state with mock data for development
 const initialState: UserState = {
-  user: null,
-  subscription: null,
+  user: mockUser,
+  subscription: mockSubscription,
   isLoading: false,
   error: null
 }
@@ -61,34 +82,17 @@ export const useUserStore = create<UserState & UserActions>()(
         set({ user, error: null })
       },
 
-      // Update user profile
+      // Update user profile (mock implementation)
       updateProfile: async (updates: Partial<User>) => {
         set({ isLoading: true, error: null })
 
-        try {
-          const response = await fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updates)
-          })
-
-          if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Failed to update profile')
-          }
-
-          const updatedUser = await response.json()
-
+        // Mock implementation - just update local state
+        setTimeout(() => {
           set(state => ({
-            user: { ...state.user!, ...updatedUser.user },
+            user: state.user ? { ...state.user, ...updates, updatedAt: new Date() } : null,
             isLoading: false
           }))
-        } catch (error) {
-          set({
-            isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to update profile'
-          })
-        }
+        }, 500) // Simulate API delay
       },
 
       // Set subscription
@@ -125,66 +129,24 @@ export const useUserStore = create<UserState & UserActions>()(
         }
       },
 
-      // Refresh user data
+      // Refresh user data (mock implementation)
       refreshUser: async () => {
         set({ isLoading: true, error: null })
 
-        try {
-          const response = await fetch('/api/user/profile', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          })
-
-          if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Failed to refresh user data')
-          }
-
-          const { user, subscription } = await response.json()
-
+        // Mock implementation - just ensure mock data is set
+        setTimeout(() => {
           set({
-            user,
-            subscription,
+            user: mockUser,
+            subscription: mockSubscription,
             isLoading: false
           })
-        } catch (error) {
-          set({
-            isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to refresh user data'
-          })
-        }
+        }, 300) // Simulate API delay
       },
 
-      // Update usage statistics
+      // Update usage statistics (mock implementation)
       updateUsageStats: async () => {
-        try {
-          const response = await fetch('/api/user/usage', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          })
-
-          if (!response.ok) {
-            console.warn('Failed to update usage stats')
-            return
-          }
-
-          const stats = await response.json()
-
-          // Update user with new usage stats if user exists
-          set(state => {
-            if (state.user) {
-              return {
-                user: {
-                  ...state.user,
-                  usage: stats.usage
-                }
-              }
-            }
-            return state
-          })
-        } catch (error) {
-          console.error('Error updating usage stats:', error)
-        }
+        // Mock implementation - no actual API call
+        console.log('Usage stats update: mocked (no authentication)')
       }
     }),
     persistOptions

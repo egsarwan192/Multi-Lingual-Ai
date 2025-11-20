@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-// import { openRouterService } from '@/lib/llm/OpenRouterService'
+import { openRouterService } from '@/lib/llm/OpenRouterService'
 import { LLMModel, Message } from '@/lib/llm/types'
 import { persistOptions } from '@/lib/persistConfig'
 
@@ -165,7 +165,7 @@ export const useChatStore = create<ChatState & ChatActions>(
 
           if (response.body && typeof response.body.getReader === 'function') {
             // Handle streaming response
-            await handleStreamingResponse(response, set, get)
+            await handleStreamingResponse(response, set)
           } else {
             // Handle non-streaming response
             const data = await response.json()
@@ -227,8 +227,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load chat'
-          })
+            error: error instanceof Error ? error.message : 'Failed to load chat' })
         }
       },
 
@@ -261,8 +260,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to delete chat'
-          })
+            error: error instanceof Error ? error.message : 'Failed to delete chat' })
         }
       },
 
@@ -301,8 +299,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to update chat'
-          })
+            error: error instanceof Error ? error.message : 'Failed to update chat' })
         }
       },
 
@@ -376,8 +373,7 @@ export const useChatStore = create<ChatState & ChatActions>(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load history'
-          })
+            error: error instanceof Error ? error.message : 'Failed to load history' })
         }
       },
 
@@ -406,7 +402,7 @@ function getModelProviderFromId(modelId: string): string {
 }
 
 // Helper function to handle streaming responses
-async function handleStreamingResponse(response: Response, set: any, get: any) {
+async function handleStreamingResponse(response: Response, set: any) {
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
 
@@ -462,7 +458,6 @@ async function handleStreamingResponse(response: Response, set: any, get: any) {
       }
     }
 }
-}
 
 // Convenience selectors
 export const useChat = () => useChatStore()
@@ -474,3 +469,4 @@ export const useIsLoading = () => useChatStore(state => state.isLoading)
 export const useIsStreaming = () => useChatStore(state => state.isStreaming)
 export const useStreamMessage = () => useChatStore(state => state.streamMessage)
 export const useChatError = () => useChatStore(state => state.error)
+

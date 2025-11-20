@@ -20,7 +20,8 @@ export function ChatInterface({ className = '' }: ChatInterfaceProps) {
   const availableModelsLoaded = useChatStore(state => state.availableModels.length > 0)
 
   const user = useUserStore(state => state.user)
-  const subscriptionTier = useUserStore(state => state.subscriptionTier)
+  const subscription = useUserStore(state => state.subscription)
+  const subscriptionTier = subscription?.tier || 'FREE'
 
   // Initialize available models based on user's subscription tier
   useEffect(() => {
