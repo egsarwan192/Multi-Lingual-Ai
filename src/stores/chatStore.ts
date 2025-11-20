@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { openRouterService } from '@/lib/llm/OpenRouterService'
+// import { openRouterService } from '@/lib/llm/OpenRouterService'
 import { LLMModel, Message } from '@/lib/llm/types'
 import { persistOptions } from '@/lib/persistConfig'
 
