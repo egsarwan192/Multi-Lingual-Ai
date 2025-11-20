@@ -141,11 +141,12 @@ export async function POST(request: NextRequest) {
       const encoder = new TextEncoder()
 
       try {
+        // TODO: Authentication removed - use generic user ID for public access
         const llmStream = await openRouterService.sendMessageStream(
           message,
           conversation,
           chat.modelName,
-          session.user.id
+          'public-user'
         )
 
         return new Response(llmStream, {
