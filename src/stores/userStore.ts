@@ -1,7 +1,27 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { User, Subscription } from '@prisma/client'
 import { persistOptions } from '@/lib/persistConfig'
+
+// Client-side types that match Prisma schema without importing from @prisma/client
+export interface User {
+  id: string
+  email: string
+  displayName?: string
+  subscriptionTier: 'FREE' | 'PREMIUM' | 'PRO'
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Subscription {
+  id: string
+  userId: string
+  tier: 'FREE' | 'PREMIUM' | 'PRO'
+  status: 'active' | 'canceled' | 'past_due' | 'incomplete'
+  currentPeriodEnd?: Date
+  stripeSubscriptionId?: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 // Types for user state
 export interface UserState {
