@@ -36,6 +36,11 @@ export interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp?: Date
+  tokenUsage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
 }
 
 export interface UsageLimits {
