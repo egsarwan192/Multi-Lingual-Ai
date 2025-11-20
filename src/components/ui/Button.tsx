@@ -53,14 +53,10 @@ export default function Button({
       disabled={disabled || loading}
       {...props}
     >
-      {loading ? (
+      {loading && (
         <svg className="animate-spin -ml-2 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v16a8 8 0 018-8z" />
-        </svg>
-      ) : (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18" />
         </svg>
       )}
       {children}
