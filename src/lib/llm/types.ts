@@ -1,4 +1,5 @@
-import { ModelProvider } from '@prisma/client'
+// ModelProvider type (matches Prisma schema)
+export type ModelProvider = 'OPENAI' | 'ANTHROPIC' | 'GOOGLE' | 'DEEPSEEK'
 
 export interface LLMProvider {
   name: string
