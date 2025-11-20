@@ -50,7 +50,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
 
   const onSubmit = async (data: SignupFormData) => {
   try {
-    await signup(data.email, data.password, data.confirmPassword)
+    await signup(data.email, data.password, data.confirmPassword, data.name)
 
     // If parent passed onSuccess, call it
     if (typeof onSuccess === 'function') {
