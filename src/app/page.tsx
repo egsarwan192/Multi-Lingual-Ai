@@ -1,41 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import LoginForm from '@/components/auth/LoginForm'
-import SignupForm  from '@/components/auth/SignupForm'
 import Button from '@/components/ui/Button'
-import { useUserStore } from '@/stores/userStore'
 
 export default function HomePage() {
   const router = useRouter()
-  const user = useUserStore(state => state.user)
-  const isLoading = useUserStore(state => state.isLoading)
   const [isLogin, setIsLogin] = useState(true)
-
-  // Redirect authenticated users to chat
-  useEffect(() => {
-    if (user && !isLoading) {
-      router.push('/chat')
-    }
-  }, [user, isLoading, router])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
-  // If user is authenticated, show loading state while redirecting
-  if (user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -91,23 +62,24 @@ export default function HomePage() {
             <div className="flex space-x-4">
               <Button
                 variant="primary"
-                onClick={() => setIsLogin(true)}
+                onClick={() => router.push('/chat')}
                 className="flex-1"
               >
                 Sign In
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => setIsLogin(false)}
+                onClick={() => router.push('/chat')}
                 className="flex-1"
               >
                 Create Account
               </Button>
             </div>
+
           </div>
         </div>
 
-        {/* Right side - Auth forms */}
+        {/* Right side - Info / auth stub */}
         <div className="flex-1 flex items-center justify-center px-8 lg:px-16 bg-white">
           <div className="max-w-md w-full">
             <div className="text-center mb-8">
@@ -120,15 +92,24 @@ export default function HomePage() {
                 {isLogin ? 'Welcome Back' : 'Get Started'}
               </h2>
               <p className="text-gray-600 mt-2">
-                {isLogin ? 'Sign in to your account' : 'Create your free account'}
+                {isLogin ? 'Sign in to your account (removed)' : 'Create your free account (removed)'}
               </p>
             </div>
 
-            {isLogin ? (
-              <LoginForm onSuccess={() => router.push('/chat')} />
-            ) : (
-              <SignupForm onSuccess={() => router.push('/chat')} />
-            )}
+            {/* Stub content instead of real Login/Signup forms */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <div className="text-left">
+                <h3 className="text-lg font-semibold mb-2">Authentication Removed</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Login and signup functionality has been removed. Click <strong>Sign In</strong> or <strong>Create Account</strong> to proceed to the chat.
+                </p>
+
+                <div className="flex items-center space-x-3">
+                  <Button variant="primary" onClick={() => router.push('/chat')}>Go to Chat</Button>
+                  <Button variant="ghost" onClick={() => setIsLogin(!isLogin)}>{isLogin ? 'Switch to Sign up' : 'Switch to Sign in'}</Button>
+                </div>
+              </div>
+            </div>
 
             <div className="mt-6 text-center">
               <button
