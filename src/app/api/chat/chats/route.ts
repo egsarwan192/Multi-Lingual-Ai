@@ -10,7 +10,7 @@ type ModelProvider = 'OPENAI' | 'ANTHROPIC' | 'GOOGLE' | 'DEEPSEEK'
 // Validation schema for creating a new chat
 const createChatSchema = z.object({
   title: z.string().optional(),
-  modelProvider: z.nativeEnum(ModelProvider),
+  modelProvider: z.enum(['OPENAI', 'ANTHROPIC', 'GOOGLE', 'DEEPSEEK']),
   modelName: z.string().min(1, 'Model name is required'),
   initialMessage: z.string().min(1, 'Initial message is required')
 })
