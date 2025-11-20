@@ -462,3 +462,15 @@ async function handleStreamingResponse(response: Response, set: any) {
       }
     }
 }
+}
+
+// Convenience selectors
+export const useChat = () => useChatStore()
+export const useCurrentChat = () => useChatStore(state => state.currentChat)
+export const useMessages = () => useChatStore(state => state.messages)
+export const useSelectedModel = () => useChatStore(state => state.selectedModel)
+export const useChatHistory = () => useChatStore(state => state.chatHistory)
+export const useIsLoading = () => useChatStore(state => state.isLoading)
+export const useIsStreaming = () => useChatStore(state => state.isStreaming)
+export const useStreamMessage = () => useChatStore(state => state.streamMessage)
+export const useChatError = () => useChatStore(state => state.error)
