@@ -165,7 +165,7 @@ export const useChatStore = create<ChatState & ChatActions>(
 
           if (response.body && typeof response.body.getReader === 'function') {
             // Handle streaming response
-            await handleStreamingResponse(response, set)
+            await handleStreamingResponse(response, set, get)
           } else {
             // Handle non-streaming response
             const data = await response.json()
