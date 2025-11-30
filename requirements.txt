@@ -1,0 +1,160 @@
+# Multi-LLM Platform Requirements
+# ================================
+# This document outlines the requirements for setting up and running the Multi-LLM Platform
+
+# System Requirements
+# ----------------
+# Node.js Runtime
+node>=18.0.0
+
+# Package Manager
+npm>=9.0.0
+# or
+yarn>=1.22.0
+# or
+pnpm>=8.0.0
+
+# Database Requirements
+# ------------------
+# PostgreSQL (for production)
+postgresql>=14.0
+
+# Environment Variables Required
+# ------------------------
+# Copy .env.local.example to .env.local and configure:
+# NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+# STRIPE_SECRET_KEY=your_stripe_secret
+# OPENAI_API_KEY=your_openai_key
+# ANTHROPIC_API_KEY=your_anthropic_key
+# GOOGLE_AI_API_KEY=your_google_key
+# DEEPSEEK_API_KEY=your_deepseek_key
+
+# Core Dependencies (Node.js)
+# ==========================
+react@^19.2.0
+react-dom@^19.2.0
+next@^16.0.1
+@supabase/ssr@^0.3.0
+@prisma/client@^5.19.0
+@tanstack/react-query@^5.51.0
+zustand@^4.5.4
+stripe@^16.9.0
+
+# LLM Provider Dependencies
+# =========================
+openai@^4.52.0
+@anthropic-ai/sdk@^0.24.0
+@google/generative-ai@^0.15.0
+ai@^3.2.24
+@ai-sdk/openai@^0.0.50
+@ai-sdk/anthropic@^0.0.43
+@ai-sdk/google@^0.0.44
+
+# Utility Dependencies
+# ===================
+crypto-js@^4.2.0
+lucide-react@^0.400.0
+react-markdown@^9.0.1
+rehype-highlight@^7.0.0
+
+# Form Dependencies
+# ==================
+@hookform/resolvers@^3.7.0
+react-hook-form@^7.52.0
+zod@^3.23.0
+
+# Development Dependencies (if running locally)
+# ====================================
+typescript@^5.0.0
+@types/node@^20.0.0
+@types/react@^19.0.0
+@types/react-dom@^19.0.0
+@types/crypto-js@^4.2.0
+tailwindcss@^3.4.0
+autoprefixer@^10.0.0
+postcss@^8.0.0
+eslint@^9.0.0
+eslint-config-next@^16.0.1
+prisma@^5.19.0
+jest@^29.7.0
+@types/jest@^29.5.12
+jest-environment-jsdom@^29.7.0
+@testing-library/react@^15.0.0
+playwright@^1.47.0
+@playwright/test@^1.47.0
+tsx@^4.17.0
+
+# Setup Instructions
+# ================
+# 1. Install dependencies:
+#    npm install
+#
+# 2. Set up environment variables:
+#    cp .env.local.example .env.local
+#    # Edit .env.local with your actual keys
+#
+# 3. Set up database:
+#    npx prisma generate
+#    npx prisma db push
+#
+# 4. Run development server:
+#    npm run dev
+#
+# 5. Build for production:
+#    npm run build
+#    npm start
+
+# Docker Requirements (if using Docker)
+# =================================
+# Dockerfile should include:
+# FROM node:18-alpine
+# WORKDIR /app
+# COPY package*.json ./
+# RUN npm ci --only=production
+# COPY . .
+# RUN npm run build
+# EXPOSE 3000
+# CMD ["npm", "start"]
+
+# Testing Requirements
+# ===================
+# Run unit tests:
+#    npm run test:unit
+#
+# Run integration tests:
+#    npm run test:integration
+#
+# Run E2E tests:
+#    npm run test:e2e
+
+# Production Deployment Notes
+# =========================
+# 1. Ensure all environment variables are set in production
+# 2. Database URL should use SSL in production
+# 3. Enable NEXT_TLS_CERTIFICATE_FILE and NEXT_TLS_KEY_FILE for HTTPS
+# 4. Configure CORS origins properly
+# 5. Set up proper monitoring and logging
+# 6. Ensure rate limiting is configured
+# 7. Set up database backups
+
+# Security Considerations
+# =====================
+# 1. All API keys should be stored as environment variables
+# 2. Enable HTTPS in production
+# 3. Configure proper CORS policies
+# 4. Set up rate limiting
+# 5. Enable security headers (already configured in middleware)
+# 6. Regular dependency updates:
+#    npm audit
+#    npm update
+
+# Performance Optimizations
+# =======================
+# 1. Enable Redis for session storage in production
+# 2. Configure CDN for static assets
+# 3. Enable response compression
+# 4. Set up proper caching strategies
+# 5. Monitor memory usage and performance metrics
